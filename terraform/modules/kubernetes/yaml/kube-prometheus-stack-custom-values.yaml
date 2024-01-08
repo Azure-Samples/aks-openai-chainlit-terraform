@@ -1,0 +1,92 @@
+# prom-custom-values.yaml
+prometheus:
+  prometheusSpec:
+    additionalScrapeConfigs:
+      - job_name: 'kubernetes-services'
+        kubernetes_sd_configs:
+        - role: service
+        relabel_configs:
+
+        # annotation 'prometheus.io/scrape' must be set to 'true'
+        - action: keep
+          regex: true
+          source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+
+        # service cannot be in kube-system or prom namespaces
+        - action: drop
+          regex: (kube-system|prom)
+          source_labels: [__meta_kubernetes_namespace]
+
+        # service port name must end with word 'metrics'
+        - action: keep
+          regex: .*metrics
+          source_labels: [__meta_kubernetes_service_port_name]
+
+        # allow override of http scheme
+        - action: replace
+          regex: (https?)
+          source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+          target_label: __scheme__
+
+        # allow override of default /metrics path
+        - action: replace
+          regex: (.+)
+          source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+          target_label: __metrics_path__
+
+        # allow override of default port
+        - action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+          target_label: __address__
+        - {action: labelmap, regex: __meta_kubernetes_service_label_(.+)}
+        - action: replace
+          source_labels: [__meta_kubernetes_namespace]
+          target_label: kubernetes_namespace
+        - action: replace
+          source_labels: [__meta_kubernetes_service_name]
+          target_label: kubernetes_name
+      
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+        - role: pod
+
+        relabel_configs:
+        # Scrape only pods with the annotation: prometheus.io/scrape = true
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+
+        # If prometheus.io/path is specified, scrape this path instead of /metrics
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+
+        # If prometheus.io/port is specified, scrape this port instead of the default
+        - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          target_label: __address__
+
+        # If prometheus.io/scheme is specified, scrape with this scheme instead of http
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+          action: replace
+          regex: (http|https)
+          target_label: __scheme__
+
+        # Include the pod namespace as a label for each metric
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: kubernetes_namespace
+
+        # Include the pod name as a label for each metric
+        - source_labels: [__meta_kubernetes_pod_name]
+          action: replace
+          target_label: kubernetes_pod_name
+
+        # [Optional] Include all pod labels as labels for each metric
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)

@@ -1,0 +1,163 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docs
+  labels:
+    app: docs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: docs
+      azure.workload.identity/use: "true"
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: docs
+        azure.workload.identity/use: "true"
+        prometheus.io/scrape: "true"
+    spec:
+      serviceAccountName: chainlit-sa
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: docs
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: docs
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: docs
+        image: contoso.azurecr.io/chainlitdocs:v1
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8000
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          failureThreshold: 1
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          failureThreshold: 1
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8000
+          failureThreshold: 1
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+        env:
+        - name: TEMPERATURE
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: TEMPERATURE
+        - name: AZURE_OPENAI_TYPE
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: AZURE_OPENAI_TYPE
+        - name: AZURE_OPENAI_BASE
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: AZURE_OPENAI_BASE
+        - name: AZURE_OPENAI_KEY
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: AZURE_OPENAI_KEY
+        - name: AZURE_OPENAI_VERSION
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: AZURE_OPENAI_VERSION
+        - name: AZURE_OPENAI_DEPLOYMENT
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: AZURE_OPENAI_DEPLOYMENT
+        - name: AZURE_OPENAI_MODEL
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: AZURE_OPENAI_MODEL
+        - name: AZURE_OPENAI_ADA_DEPLOYMENT
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: AZURE_OPENAI_ADA_DEPLOYMENT
+        - name: CHAINLIT_MAX_SIZE_MB
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: CHAINLIT_MAX_SIZE_MB
+        - name: CHAINLIT_MAX_FILES
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: CHAINLIT_MAX_FILES
+        - name: TEXT_SPLITTER_CHUNK_SIZE
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: TEXT_SPLITTER_CHUNK_SIZE
+        - name: TEXT_SPLITTER_CHUNK_OVERLAP
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: TEXT_SPLITTER_CHUNK_OVERLAP
+        - name: EMBEDDINGS_CHUNK_SIZE
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: EMBEDDINGS_CHUNK_SIZE
+        - name: MAX_RETRIES
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: MAX_RETRIES
+        - name: RETRY_MIN_SECONDS
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: RETRY_MIN_SECONDS
+        - name: RETRY_MAX_SECONDS
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: RETRY_MAX_SECONDS
+        - name: TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: TIMEOUT
