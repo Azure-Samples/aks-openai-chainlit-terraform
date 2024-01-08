@@ -736,7 +736,7 @@ Open the Azure Portal, and navigate to the resource group. Open the Azure Open A
 
 ![OpenAI Key and Endpoint](/images/openai.png)
 
-Open to the `<Prefix>WorkloadManagedIdentity` managed identity, navigate to the `Federated credentials`, and verify that the federated identity credentials for the `magic8ball-sa` service account were created correctly, as shown in the following picture.
+Open to the `<Prefix>WorkloadManagedIdentity` managed identity, navigate to the `Federated credentials`, and verify that the federated identity credentials for the `chainlit-sa` service account were created correctly, as shown in the following picture.
 
 ![Federated Identity Credentials](/images/federatedidentitycredentials.png)
 
