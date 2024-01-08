@@ -68,6 +68,8 @@ messages = [
 prompt = ChatPromptTemplate.from_messages(messages)
 chain_type_kwargs = {"prompt": prompt}
 
+# Configure OpenAI
+
 # Configure a logger
 logging.basicConfig(
     stream=sys.stdout,
@@ -99,7 +101,7 @@ async def start():
         name="Error", url="https://cdn-icons-png.flaticon.com/512/8649/8649595.png"
     ).send()
     await cl.Avatar(
-        name="User",
+        name="You",
         url="https://media.architecturaldigest.com/photos/5f241de2c850b2a36b415024/master/w_1600%2Cc_limit/Luke-logo.png",
     ).send()
 
@@ -135,8 +137,13 @@ async def start():
 
     # Process each file uplodaded by the user
     for file in files:
+        
+        # Read file contents
+        with open(file.path, "rb") as file:
+            file_contents = file.read()
+
         # Create an in-memory buffer from the file content
-        bytes = io.BytesIO(file.content)
+        bytes = io.BytesIO(file_contents)
 
         # Get file extension
         extension = file.name.split(".")[-1]

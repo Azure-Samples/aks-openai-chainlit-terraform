@@ -56,6 +56,7 @@ logging.basicConfig(
     format="[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s",
     level=logging.INFO,
 )
+
 logger = logging.getLogger(__name__)
 
 
@@ -68,7 +69,7 @@ async def start_chat():
         name="Error", url="https://cdn-icons-png.flaticon.com/512/8649/8649595.png"
     ).send()
     await cl.Avatar(
-        name="User",
+        name="You",
         url="https://media.architecturaldigest.com/photos/5f241de2c850b2a36b415024/master/w_1600%2Cc_limit/Luke-logo.png",
     ).send()
     cl.user_session.set(
