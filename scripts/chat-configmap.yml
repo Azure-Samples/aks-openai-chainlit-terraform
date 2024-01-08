@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chat-configmap
+data:
+  TEMPERATURE: "0.9"
+  AZURE_OPENAI_TYPE: azure_ad
+  AZURE_OPENAI_BASE: https://contoso.openai.azure.com/
+  AZURE_OPENAI_KEY: ""
+  AZURE_OPENAI_VERSION: 2023-12-01-preview
+  AZURE_OPENAI_DEPLOYMENT: gpt-35-turbo
+  AZURE_OPENAI_MODEL: gpt-35-turbo
+  AZURE_OPENAI_SYSTEM_MESSAGE: "You are a helpful assistant."
+  MAX_RETRIES: "5"
+  TIMEOUT: "30"

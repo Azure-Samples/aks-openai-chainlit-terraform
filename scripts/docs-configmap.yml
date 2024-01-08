@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docs-configmap
+data:
+  TEMPERATURE: "0.9"
+  AZURE_OPENAI_TYPE: azure_ad
+  AZURE_OPENAI_BASE: https://contoso.openai.azure.com/
+  AZURE_OPENAI_KEY: ""
+  AZURE_OPENAI_VERSION: 2023-12-01-preview
+  AZURE_OPENAI_DEPLOYMENT: gpt-35-turbo
+  AZURE_OPENAI_MODEL: gpt-35-turbo
+  AZURE_OPENAI_ADA_DEPLOYMENT: text-embedding-ada-002
+  CHAINLIT_MAX_SIZE_MB: "100"
+  CHAINLIT_MAX_FILES: "10"
+  TEXT_SPLITTER_CHUNK_SIZE: "1000"
+  TEXT_SPLITTER_CHUNK_OVERLAP: "10"
+  EMBEDDINGS_CHUNK_SIZE: "16"
+  MAX_RETRIES: "5"
+  RETRY_MIN_SECONDS: "1"
+  RETRY_MAX_SECONDS: "5"
+  TIMEOUT: "30"
