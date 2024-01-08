@@ -88,7 +88,7 @@ cffi==1.16.0
     # via
     #   -r requirements.in
     #   cryptography
-chainlit==0.7.700
+chainlit==1.0.0
     # via -r requirements.in
 charset-normalizer==3.3.2
     # via
@@ -204,6 +204,7 @@ httpx==0.24.1
     # via
     #   -r requirements.in
     #   chainlit
+    #   literalai
     #   openai
 huggingface-hub==0.19.4
     # via
@@ -259,6 +260,10 @@ langsmith==0.0.70
     #   langchain-community
     #   langchain-core
 lazify==0.4.0
+    # via
+    #   -r requirements.in
+    #   chainlit
+literalai==0.0.1
     # via
     #   -r requirements.in
     #   chainlit
@@ -323,7 +328,7 @@ onnxruntime==1.16.3
     #   chromadb
 openai==1.4.0
     # via -r requirements.in
-opentelemetry-api==1.21.0
+opentelemetry-api==1.22.0
     # via
     #   -r requirements.in
     #   chromadb
@@ -334,58 +339,58 @@ opentelemetry-api==1.21.0
     #   opentelemetry-instrumentation-fastapi
     #   opentelemetry-sdk
     #   uptrace
-opentelemetry-exporter-otlp==1.21.0
+opentelemetry-exporter-otlp==1.22.0
     # via
     #   -r requirements.in
     #   uptrace
-opentelemetry-exporter-otlp-proto-common==1.21.0
+opentelemetry-exporter-otlp-proto-common==1.22.0
     # via
     #   -r requirements.in
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
-opentelemetry-exporter-otlp-proto-grpc==1.21.0
+opentelemetry-exporter-otlp-proto-grpc==1.22.0
     # via
     #   -r requirements.in
     #   chromadb
     #   opentelemetry-exporter-otlp
-opentelemetry-exporter-otlp-proto-http==1.21.0
+opentelemetry-exporter-otlp-proto-http==1.22.0
     # via
     #   -r requirements.in
     #   opentelemetry-exporter-otlp
-opentelemetry-instrumentation==0.42b0
+opentelemetry-instrumentation==0.43b0
     # via
     #   -r requirements.in
     #   opentelemetry-instrumentation-asgi
     #   opentelemetry-instrumentation-fastapi
     #   uptrace
-opentelemetry-instrumentation-asgi==0.42b0
+opentelemetry-instrumentation-asgi==0.43b0
     # via
     #   -r requirements.in
     #   opentelemetry-instrumentation-fastapi
-opentelemetry-instrumentation-fastapi==0.42b0
+opentelemetry-instrumentation-fastapi==0.43b0
     # via
     #   -r requirements.in
     #   chromadb
-opentelemetry-proto==1.21.0
+opentelemetry-proto==1.22.0
     # via
     #   -r requirements.in
     #   opentelemetry-exporter-otlp-proto-common
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
-opentelemetry-sdk==1.21.0
+opentelemetry-sdk==1.22.0
     # via
     #   -r requirements.in
     #   chromadb
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-exporter-otlp-proto-http
     #   uptrace
-opentelemetry-semantic-conventions==0.42b0
+opentelemetry-semantic-conventions==0.43b0
     # via
     #   -r requirements.in
     #   opentelemetry-instrumentation-asgi
     #   opentelemetry-instrumentation-fastapi
     #   opentelemetry-sdk
-opentelemetry-util-http==0.42b0
+opentelemetry-util-http==0.43b0
     # via
     #   -r requirements.in
     #   opentelemetry-instrumentation-asgi
@@ -400,6 +405,7 @@ packaging==23.2
     #   chainlit
     #   huggingface-hub
     #   langchain-core
+    #   literalai
     #   marshmallow
     #   msal-extensions
     #   onnxruntime
@@ -445,6 +451,7 @@ pydantic==2.5.2
     #   langchain
     #   langchain-core
     #   langsmith
+    #   literalai
     #   openai
 pydantic-core==2.14.5
     # via
@@ -617,7 +624,7 @@ typing-inspect==0.9.0
     # via
     #   -r requirements.in
     #   dataclasses-json
-uptrace==1.21.0
+uptrace==1.22.0
     # via
     #   -r requirements.in
     #   chainlit
