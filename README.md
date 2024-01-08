@@ -2211,97 +2211,114 @@ cat $deploymentTemplate |
 kubectl apply -f $serviceTemplate -n $namespace
 ```
 
-The script creates an A record in the Azure Public DNS Zone to expose the `chat` and `docs` applications via a given subdomain (e.g., `https://chat.contoso.com`)
+The `10-configure-dns.sh` script creates an A record in the Azure Public DNS Zone to expose the `chat` and `docs` applications via a given subdomain (e.g., `https://chat.contoso.com`)
 
 ```bash
-#!/bin/bash
-
 # Variables
 source ./00-variables.sh
+subdomains=($docsSubdomain $chatSubdomain)
 
-# Attach ACR to AKS cluster
-if [[ $attachAcr == true ]]; then
-  echo "Attaching ACR $acrName to AKS cluster $aksClusterName..."
-  az aks update \
-    --name $aksClusterName \
-    --resource-group $aksResourceGroupName \
-    --attach-acr $acrName
+# Install jq if not installed
+path=$(which jq)
+
+if [[ -z $path ]]; then
+    echo 'Installing jq...'
+    apt install -y jq
 fi
 
-# Check if namespace exists in the cluster
-result=$(kubectl get namespace -o jsonpath="{.items[?(@.metadata.name=='$namespace')].metadata.name}")
-
-if [[ -n $result ]]; then
-  echo "$namespace namespace already exists in the cluster"
+# Choose the ingress controller to use
+if [[ $ingressClassName == "nginx" ]]; then
+    ingressNamespace=$nginxNamespace
+    ingressServiceName="${nginxReleaseName}-controller"
 else
-  echo "$namespace namespace does not exist in the cluster"
-  echo "creating $namespace namespace in the cluster..."
-  kubectl create namespace $namespace
+    ingressNamespace=$webAppRoutingNamespace
+    ingressServiceName=$webAppRoutingServiceName
 fi
 
-# Create docs-configmap
-cat docs-configmap.yml |
-    yq "(.data.TEMPERATURE)|="\""$temperature"\" |
-    yq "(.data.AZURE_OPENAI_TYPE)|="\""$openAiType"\" |
-    yq "(.data.AZURE_OPENAI_KEY)|="\""$openAiKey"\" |
-    yq "(.data.AZURE_OPENAI_VERSION)|="\""$openAiVersion"\" |
-    yq "(.data.AZURE_OPENAI_BASE)|="\""$openAiBase"\" |
-    yq "(.data.AZURE_OPENAI_DEPLOYMENT)|="\""$openAiChatDeployment"\" |
-    yq "(.data.AZURE_OPENAI_MODEL)|="\""$openAiChatModel"\" |
-    yq "(.data.AZURE_OPENAI_ADA_DEPLOYMENT)|="\""$openAiEmbeddingsDeployment"\" |
-    kubectl apply -n $namespace -f -
+# Retrieve the public IP address of the NGINX ingress controller
+echo "Retrieving the external IP address of the [$ingressClassName] NGINX ingress controller..."
+publicIpAddress=$(kubectl get service -o json -n $ingressNamespace |
+    jq -r '.items[] | 
+    select(.spec.type == "LoadBalancer" and .metadata.name == "'$ingressServiceName'") |
+    .status.loadBalancer.ingress[0].ip')
 
-# Create docs-deployment
-cat docs-deployment.yml |
-    yq "(.spec.template.spec.containers[0].image)|="\""$acrName.azurecr.io/$docsImageName:$tag"\" |
-    yq "(.spec.template.spec.containers[0].imagePullPolicy)|="\""$imagePullPolicy"\" |
-    yq "(.spec.template.spec.serviceAccountName)|="\""$serviceAccountName"\" |
-    kubectl apply -n $namespace -f -
+if [ -n "$publicIpAddress" ]; then
+    echo "[$publicIpAddress] external IP address of the [$ingressClassName] NGINX ingress controller successfully retrieved"
+else
+    echo "Failed to retrieve the external IP address of the [$ingressClassName] NGINX ingress controller"
+    exit
+fi
 
-# Create docs-service
-kubectl apply -f docs-service.yml -n $namespace
+for subdomain in ${subdomains[@]}; do
+    # Check if an A record for todolist subdomain exists in the DNS Zone
+    echo "Retrieving the A record for the [$subdomain] subdomain from the [$dnsZoneName] DNS zone..."
+    ipv4Address=$(az network dns record-set a list \
+        --zone-name $dnsZoneName \
+        --resource-group $dnsZoneResourceGroupName \
+        --query "[?name=='$subdomain'].ARecords[].ipv4Address" \
+        --output tsv \
+        --only-show-errors)
 
-# Create docs-ingress
-cat docs-ingress.yml |
-  yq "(.metadata.name)|="\""$docsIngressName"\" |
-  yq "(.metadata.annotations.\"cert-manager.io/cluster-issuer\")|="\""$clusterIssuer"\" |
-  yq "(.spec.ingressClassName)|="\""$ingressClassName"\" |
-  yq "(.spec.tls[0].hosts[0])|="\""$docsSubdomain.$dnsZoneName"\" |
-  yq "(.spec.tls[0].secretName)|="\""$docsIngressSecretName"\" |
-  yq "(.spec.rules[0].host)|="\""$docsSubdomain.$dnsZoneName"\" |
-  kubectl apply -n $namespace -f -
+    if [[ -n $ipv4Address ]]; then
+        echo "An A record already exists in [$dnsZoneName] DNS zone for the [$subdomain] subdomain with [$ipv4Address] IP address"
 
-# Create chat-configmap
-cat chat-configmap.yml |
-    yq "(.data.TEMPERATURE)|="\""$temperature"\" |
-    yq "(.data.AZURE_OPENAI_TYPE)|="\""$openAiType"\" |
-    yq "(.data.AZURE_OPENAI_KEY)|="\""$openAiKey"\" |
-    yq "(.data.AZURE_OPENAI_VERSION)|="\""$openAiVersion"\" |
-    yq "(.data.AZURE_OPENAI_BASE)|="\""$openAiBase"\" |
-    yq "(.data.AZURE_OPENAI_DEPLOYMENT)|="\""$openAiChatDeployment"\" |
-    yq "(.data.AZURE_OPENAI_MODEL)|="\""$openAiChatModel"\" |
-    yq "(.data.AZURE_OPENAI_SYSTEM_MESSAGE)|="\""$openAiChatSystemMessage"\" |
-    kubectl apply -n $namespace -f -
+        if [[ $ipv4Address == $publicIpAddress ]]; then
+            echo "The [$ipv4Address] ip address of the existing A record is equal to the ip address of the ingress"
+            echo "No additional step is required"
+            continue
+        else
+            echo "The [$ipv4Address] ip address of the existing A record is different than the ip address of the ingress"
+        fi
+        # Retrieving name of the record set relative to the zone
+        echo "Retrieving the name of the record set relative to the [$dnsZoneName] zone..."
 
-# Create chat-deployment
-cat chat-deployment.yml |
-    yq "(.spec.template.spec.containers[0].image)|="\""$acrName.azurecr.io/$chatImageName:$tag"\" |
-    yq "(.spec.template.spec.containers[0].imagePullPolicy)|="\""$imagePullPolicy"\" |
-    yq "(.spec.template.spec.serviceAccountName)|="\""$serviceAccountName"\" |
-    kubectl apply -n $namespace -f -
+        recordSetName=$(az network dns record-set a list \
+            --zone-name $dnsZoneName \
+            --resource-group $dnsZoneResourceGroupName \
+            --query "[?name=='$subdomain'].name" \
+            --output tsv \
+            --only-show-errors 2>/dev/null)
 
-# Create chat-service
-kubectl apply -f chat-service.yml -n $namespace
+        if [[ -n $recordSetName ]]; then
+            echo "[$recordSetName] record set name successfully retrieved"
+        else
+            echo "Failed to retrieve the name of the record set relative to the [$dnsZoneName] zone"
+            exit
+        fi
 
-# Create chat-ingress
-cat chat-ingress.yml |
-  yq "(.metadata.name)|="\""$chatIngressName"\" |
-  yq "(.metadata.annotations.\"cert-manager.io/cluster-issuer\")|="\""$clusterIssuer"\" |
-  yq "(.spec.ingressClassName)|="\""$ingressClassName"\" |
-  yq "(.spec.tls[0].hosts[0])|="\""$chatSubdomain.$dnsZoneName"\" |
-  yq "(.spec.tls[0].secretName)|="\""$chatIngressSecretName"\" |
-  yq "(.spec.rules[0].host)|="\""$chatSubdomain.$dnsZoneName"\" |
-  kubectl apply -n $namespace -f -
+        # Remove the A record
+        echo "Removing the A record from the record set relative to the [$dnsZoneName] zone..."
+
+        az network dns record-set a remove-record \
+            --ipv4-address $ipv4Address \
+            --record-set-name $recordSetName \
+            --zone-name $dnsZoneName \
+            --resource-group $dnsZoneResourceGroupName \
+            --only-show-errors 1>/dev/null
+
+        if [[ $? == 0 ]]; then
+            echo "[$ipv4Address] ip address successfully removed from the [$recordSetName] record set"
+        else
+            echo "Failed to remove the [$ipv4Address] ip address from the [$recordSetName] record set"
+            exit
+        fi
+    fi
+
+    # Create the A record
+    echo "Creating an A record in [$dnsZoneName] DNS zone for the [$subdomain] subdomain with [$publicIpAddress] IP address..."
+    az network dns record-set a add-record \
+        --zone-name $dnsZoneName \
+        --resource-group $dnsZoneResourceGroupName \
+        --record-set-name $subdomain \
+        --ipv4-address $publicIpAddress \
+        --only-show-errors 1>/dev/null
+
+    if [[ $? == 0 ]]; then
+        echo "A record for the [$subdomain] subdomain with [$publicIpAddress] IP address successfully created in [$dnsZoneName] DNS zone"
+    else
+        echo "Failed to create an A record for the $subdomain subdomain with [$publicIpAddress] IP address in [$dnsZoneName] DNS zone"
+    fi
+done
 ```
 
 ## YAML manifests
