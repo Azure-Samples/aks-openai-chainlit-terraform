@@ -1018,6 +1018,7 @@ Finally, the application defines the method called whenever the user sends a new
 async def on_message(message: cl.Message):
     message_history = cl.user_session.get("message_history")
     message_history.append({"role": "user", "content": message.content})
+    logger.info("Question: [%s]", message.content)
 
     # Create the Chainlit response message
     msg = cl.Message(content="")
@@ -1031,6 +1032,9 @@ async def on_message(message: cl.Message):
         if stream_resp and len(stream_resp.choices) > 0:
             token = stream_resp.choices[0].delta.content or ""
             await msg.stream_token(token)
+
+    if debug:
+        logger.info("Answer: [%s]", msg.content)
 
     message_history.append({"role": "assistant", "content": msg.content})
     await msg.send()
@@ -1395,7 +1399,7 @@ The following code processes each uploaded file by extracting its content.
 4. Metadata is created for each chunk and stored in the `metadatas` list.
 
 ```python
-# Create a message to inform the user that the files are being processed
+    # Create a message to inform the user that the files are being processed
     content = ""
     if len(files) == 1:
         content = f"Processing `{files[0].name}`..."
@@ -1586,6 +1590,14 @@ The code below extracts the answers and sources from the API response and format
 - The last command sets the `AZURE_OPENAI_API_KEY` environment variable to a security key to access Azure OpenAI returned by the token provider. This key is used by the Chainlit playground.
 
 ```python
+    # Get the answer and sources from the response
+    answer = response["answer"]
+    sources = response["sources"].strip()
+    source_elements = []
+
+    if debug:
+        logger.info("Answer: [%s]", answer)
+
     # Get the metadata and texts from the user session
     metadatas = cl.user_session.get("metadatas")
     all_sources = [m["source"] for m in metadatas]
