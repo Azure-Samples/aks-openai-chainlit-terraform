@@ -161,3 +161,8 @@ spec:
             configMapKeyRef:
                 name: docs-configmap
                 key: TIMEOUT
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: DEBUG
