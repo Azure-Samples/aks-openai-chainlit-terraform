@@ -26,6 +26,7 @@ system_content = os.getenv(
 )
 max_retries = int(os.getenv("MAX_RETRIES", 5))
 timeout = int(os.getenv("TIMEOUT", 30))
+debug = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 
 # Create Token Provider
 token_provider = get_bearer_token_provider(
@@ -47,7 +48,7 @@ else:
         azure_endpoint=api_base,
         azure_ad_token_provider=token_provider,
         max_retries=max_retries,
-        timeout=timeout
+        timeout=timeout,
     )
 
 # Configure a logger
@@ -56,7 +57,6 @@ logging.basicConfig(
     format="[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s",
     level=logging.INFO,
 )
-
 logger = logging.getLogger(__name__)
 
 
@@ -82,6 +82,7 @@ async def start_chat():
 async def on_message(message: cl.Message):
     message_history = cl.user_session.get("message_history")
     message_history.append({"role": "user", "content": message.content})
+    logger.info("Question: [%s]", message.content)
 
     # Create the Chainlit response message
     msg = cl.Message(content="")
@@ -95,6 +96,9 @@ async def on_message(message: cl.Message):
         if stream_resp and len(stream_resp.choices) > 0:
             token = stream_resp.choices[0].delta.content or ""
             await msg.stream_token(token)
+
+    if debug:
+        logger.info("Answer: [%s]", msg.content)
 
     message_history.append({"role": "assistant", "content": msg.content})
     await msg.send()
