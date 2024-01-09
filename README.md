@@ -2387,6 +2387,7 @@ data:
   AZURE_OPENAI_SYSTEM_MESSAGE: "You are a helpful assistant."
   MAX_RETRIES: "5"
   TIMEOUT: "30"
+  DEBUG: "False"
 ```
 
 These are the parameters defined by the configmap:
@@ -2531,6 +2532,11 @@ spec:
             configMapKeyRef:
                 name: chat-configmap
                 key: TIMEOUT
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+                name: docs-configmap
+                key: DEBUG
 ```
 
 The application is exposed using a `ClusterIP` Kubernetes [service](https://kubernetes.io/docs/concepts/services-networking/service/).

@@ -13,3 +13,4 @@ data:
   AZURE_OPENAI_SYSTEM_MESSAGE: "You are a helpful assistant."
   MAX_RETRIES: "5"
   TIMEOUT: "30"
+  DEBUG: "False"

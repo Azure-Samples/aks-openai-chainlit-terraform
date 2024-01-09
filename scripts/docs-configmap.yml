@@ -20,3 +20,4 @@ data:
   RETRY_MIN_SECONDS: "1"
   RETRY_MAX_SECONDS: "5"
   TIMEOUT: "30"
+  DEBUG: "False"
