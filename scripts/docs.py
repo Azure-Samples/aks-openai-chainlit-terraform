@@ -37,6 +37,7 @@ embeddings_deployment = os.getenv("AZURE_OPENAI_ADA_DEPLOYMENT")
 model = os.getenv("AZURE_OPENAI_MODEL")
 max_size_mb = int(os.getenv("CHAINLIT_MAX_SIZE_MB", 100))
 max_files = int(os.getenv("CHAINLIT_MAX_FILES", 10))
+max_files = int(os.getenv("CHAINLIT_MAX_FILES", 10))
 text_splitter_chunk_size = int(os.getenv("TEXT_SPLITTER_CHUNK_SIZE", 1000))
 text_splitter_chunk_overlap = int(os.getenv("TEXT_SPLITTER_CHUNK_OVERLAP", 10))
 embeddings_chunk_size = int(os.getenv("EMBEDDINGS_CHUNK_SIZE", 16))
@@ -44,6 +45,7 @@ max_retries = int(os.getenv("MAX_RETRIES", 5))
 retry_min_seconds = int(os.getenv("RETRY_MIN_SECONDS", 1))
 retry_max_seconds = int(os.getenv("RETRY_MAX_SECONDS", 5))
 timeout = int(os.getenv("TIMEOUT", 30))
+debug = os.getenv("DEBUG", "False").lower() in ("true", "1", "t")
 
 # Configure system prompt
 system_template = """Use the following pieces of context to answer the users question.
@@ -67,8 +69,6 @@ messages = [
 ]
 prompt = ChatPromptTemplate.from_messages(messages)
 chain_type_kwargs = {"prompt": prompt}
-
-# Configure OpenAI
 
 # Configure a logger
 logging.basicConfig(
@@ -129,6 +129,7 @@ async def start():
     else:
         files_names = [f"`{f.name}`" for f in files]
         content = f"Processing {', '.join(files_names)}..."
+    logger.info(content)
     msg = cl.Message(content=content, author="Chatbot")
     await msg.send()
 
@@ -137,10 +138,11 @@ async def start():
 
     # Process each file uplodaded by the user
     for file in files:
-        
         # Read file contents
-        with open(file.path, "rb") as file:
-            file_contents = file.read()
+        with open(file.path, "rb") as uploaded_file:
+            file_contents = uploaded_file.read()
+
+        logger.info("[%d] bytes were read from %s", len(file_contents), file.path)
 
         # Create an in-memory buffer from the file content
         bytes = io.BytesIO(file_contents)
@@ -156,11 +158,15 @@ async def start():
             reader = PdfReader(bytes)
             for i in range(len(reader.pages)):
                 text += reader.pages[i].extract_text()
+                if debug:
+                    logger.info("[%s] read from %s", text, file.path)
         elif extension == "docx":
             doc = Document(bytes)
             paragraph_list = []
             for paragraph in doc.paragraphs:
                 paragraph_list.append(paragraph.text)
+                if debug:
+                    logger.info("[%s] read from %s", paragraph.text, file.path)
             text = "\n".join(paragraph_list)
 
         # Split the text into chunks
@@ -253,9 +259,11 @@ async def start():
     content = ""
     if len(files) == 1:
         content = f"`{files[0].name}` processed. You can now ask questions!"
+        logger.info(content)
     else:
         files_names = [f"`{f.name}`" for f in files]
         content = f"{', '.join(files_names)} processed. You can now ask questions."
+        logger.info(content)
     msg.content = content
     msg.author = "Chatbot"
     await msg.update()
@@ -274,11 +282,15 @@ async def main(message: cl.Message):
 
     # Get the response from the chain
     response = await chain.acall(message.content, callbacks=[cb])
+    logger.info("Question: [%s]", message.content)
 
     # Get the answer and sources from the response
     answer = response["answer"]
     sources = response["sources"].strip()
     source_elements = []
+
+    if debug:
+        logger.info("Answer: [%s]", answer)
 
     # Get the metadata and texts from the user session
     metadatas = cl.user_session.get("metadatas")
