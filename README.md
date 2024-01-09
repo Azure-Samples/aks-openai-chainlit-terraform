@@ -2547,7 +2547,7 @@ spec:
         - name: DEBUG
           valueFrom:
             configMapKeyRef:
-                name: docs-configmap
+                name: chat-configmap
                 key: DEBUG
 ```
 
