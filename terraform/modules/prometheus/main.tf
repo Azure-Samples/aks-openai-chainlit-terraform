@@ -7,6 +7,12 @@ resource "azurerm_monitor_workspace" "workspace" {
   resource_group_name           = var.resource_group_name
   location                      = var.location
   public_network_access_enabled = var.public_network_access_enabled
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_monitor_data_collection_endpoint" "dce" {
@@ -14,6 +20,12 @@ resource "azurerm_monitor_data_collection_endpoint" "dce" {
   resource_group_name = var.resource_group_name
   location            = azurerm_monitor_workspace.workspace.location
   kind                = "Linux"
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_monitor_data_collection_rule" "dcr" {
@@ -47,6 +59,12 @@ resource "azurerm_monitor_data_collection_rule" "dcr" {
   depends_on = [
     azurerm_monitor_data_collection_endpoint.dce
   ]
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_monitor_data_collection_rule_association" "dcra" {
@@ -146,6 +164,12 @@ EOF
     expression = <<EOF
 sum without (device) (  rate(node_network_transmit_drop_total{job="node", device!="lo"}[5m]))
 EOF
+  }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
   }
 }
 
@@ -304,6 +328,12 @@ EOF
 sum(rate(node_cpu_seconds_total{job="node",mode!="idle",mode!="iowait",mode!="steal"}[5m])) by (cluster) /count(sum(node_cpu_seconds_total{job="node"}) by (cluster, instance, cpu)) by (cluster)
 EOF
   }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_monitor_alert_prometheus_rule_group" "node_and_kubernetes_recording_rules_rule_group_win" {
@@ -435,6 +465,12 @@ EOF
 sum by (namespace, pod, container) (rate(windows_container_total_runtime{}[5m]))
 EOF
   }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_monitor_alert_prometheus_rule_group" "node_recording_rules_rule_group_win" {
@@ -551,5 +587,11 @@ EOF
     expression = <<EOF
 avg by (instance) ((irate(windows_logical_disk_read_seconds_total{job="windows-exporter"}[5m]) + irate(windows_logical_disk_write_seconds_total{job="windows-exporter"}[5m])))
 EOF
+  }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
   }
 }

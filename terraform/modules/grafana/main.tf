@@ -16,6 +16,12 @@ resource "azurerm_dashboard_grafana" "grafana" {
   azure_monitor_workspace_integrations {
     resource_id = var.azure_monitor_workspace_id
   }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 // Assign the Monitoring Reader role to the Azure Managed Grafana system-assigned managed identity at the workspace scope
