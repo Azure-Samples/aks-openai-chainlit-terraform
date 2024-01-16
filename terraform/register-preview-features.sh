@@ -27,7 +27,12 @@ fi
 # Registering AKS features
 aksExtensions=(
   "AzureServiceMeshPreview"
-)
+  "AKS-KedaPreview"
+  "RunCommandPreview"
+  "EnableOIDCIssuerPreview"
+  "EnableWorkloadIdentityPreview"
+  "EnableImageCleanerPreview"
+"AKS-VPAPreview")
 ok=0
 registeringExtensions=()
 for aksExtension in ${aksExtensions[@]}; do

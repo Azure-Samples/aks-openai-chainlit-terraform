@@ -34,6 +34,13 @@ resource "azurerm_cognitive_deployment" "deployment" {
   scale {
     type = "Standard"
   }
+
+  lifecycle {
+    ignore_changes = [
+      scale,
+      rai_policy_name
+    ]
+  }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "settings" {
