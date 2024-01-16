@@ -13,7 +13,6 @@ namespace                                = "chainlit"
 service_account_name                     = "chainlit-sa"
 deployment_script_primary_script_uri     = "https://paolosalvatori.blob.core.windows.net/scripts/install-packages-for-chainlit-demo.sh"
 grafana_admin_user_object_id             = "0c5267b2-01f3-4a59-970e-0d9218d5412e"
-system_node_pool_node_taints             = ["CriticalAddonsOnly=true:NoSchedule"]
 vnet_integration_enabled                 = true
 openai_deployments      = [
   {

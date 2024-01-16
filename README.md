@@ -277,7 +277,6 @@ web_app_routing_enabled              = true
 dns_zone_name                        = "babosbird.com"
 dns_zone_resource_group_name         = "DnsResourceGroup"
 grafana_admin_user_object_id         = "0c5267b2-01f3-4a59-970e-0d9218d5412e"
-system_node_pool_node_taints         = ["CriticalAddonsOnly=true:NoSchedule"]
 vnet_integration_enabled             = true
 openai_deployments      = [
   {
