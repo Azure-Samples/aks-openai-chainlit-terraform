@@ -40,3 +40,37 @@ variable "nginx_replica_count" {
   type = number
   default = 3
 }
+
+variable "host" {
+  description = "The host in the azurerm_kubernetes_cluster's kube_admin_config block. The Kubernetes cluster server host."
+  type = string
+}
+
+variable "username" {
+  description = "The username in the azurerm_kubernetes_cluster's kube_admin_config block. A username used to authenticate to the Kubernetes cluster."
+  type = string
+}
+
+variable "password" {
+  description = "The password in the azurerm_kubernetes_cluster's kube_admin_config block. A password or token used to authenticate to the Kubernetes cluster."
+  sensitive = true
+  type = string
+}
+
+variable "client_certificate" {
+  description = "The client_certificate in the azurerm_kubernetes_cluster's kube_admin_config block.  Base64 encoded public certificate used by clients to authenticate to the Kubernetes cluster."
+  sensitive = true
+  type = string
+}
+
+variable "client_key" {
+  description = "The client_key in the azurerm_kubernetes_cluster's kube_admin_config block. Base64 encoded private key used by clients to authenticate to the Kubernetes cluster."
+  sensitive = true
+  type = string
+}
+
+variable "cluster_ca_certificate" {
+  description = "The cluster_ca_certificate in the azurerm_kubernetes_cluster's kube_admin_config block. Base64 encoded public CA certificate used as the root of trust for the Kubernetes cluster."
+  sensitive = true
+  type = string
+}
