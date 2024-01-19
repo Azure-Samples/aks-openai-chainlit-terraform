@@ -211,8 +211,12 @@ module "node_pool" {
 
 module "kubernetes" {
   source                              = "./modules/kubernetes"
-  kubernetes_config_path              = module.aks_cluster.kubernetes_config_path
-  kubernetes_config_context           = module.aks_cluster.kubernetes_config_context
+  host                                = module.aks_cluster.host
+  username                            = module.aks_cluster.username
+  password                            = module.aks_cluster.password
+  client_key                          = module.aks_cluster.client_key
+  client_certificate                  = module.aks_cluster.client_certificate
+  cluster_ca_certificate              = module.aks_cluster.cluster_ca_certificate
   namespace                           = var.namespace
   service_account_name                = var.service_account_name
   email                               = var.email

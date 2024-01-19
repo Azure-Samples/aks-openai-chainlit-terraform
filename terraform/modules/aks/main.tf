@@ -163,9 +163,3 @@ resource "azurerm_monitor_diagnostic_setting" "settings" {
     category = "AllMetrics"
   }
 }
-
-resource "local_file" "kubeconfig" {
-  filename   = "${path.module}/kubeconfig"
-  content    = azurerm_kubernetes_cluster.aks_cluster.kube_admin_config_raw
-  depends_on = [azurerm_kubernetes_cluster.aks_cluster]
-}

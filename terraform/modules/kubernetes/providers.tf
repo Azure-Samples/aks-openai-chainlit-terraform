@@ -1,7 +1,9 @@
 terraform {
-  required_version = ">=0.12"
-
   required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "3.85"
+    }
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = ">=2.16.0"
@@ -17,32 +19,35 @@ terraform {
   }
 }
 
-provider "kubernetes" {
-  config_path    = var.kubernetes_config_path
-  config_context = var.kubernetes_config_context
+provider "azurerm" {
+  features {}
+}
 
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "kubelogin"
-    args = [
-      "get-token",
-      "--use-azurerm-env-vars",
-      "|",
-      "jq",
-      ".status.token"
-    ]
-  }
+provider "kubernetes" {
+  host                   = var.host
+  username               = var.username
+  password               = var.password
+  client_key             = base64decode(var.client_key)
+  client_certificate     = base64decode(var.client_certificate)
+  cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
 }
 
 provider "helm" {
   kubernetes {
-    config_path    = var.kubernetes_config_path
-    config_context = var.kubernetes_config_context
+    host                   = var.host
+    username               = var.username
+    password               = var.password
+    client_key             = base64decode(var.client_key)
+    client_certificate     = base64decode(var.client_certificate)
+    cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
   }
 }
 
 provider "kubectl" {
-  config_path      = var.kubernetes_config_path
-  config_context   = var.kubernetes_config_context
-  load_config_file = true
+  host                   = var.host
+  username               = var.username
+  password               = var.password
+  client_key             = base64decode(var.client_key)
+  client_certificate     = base64decode(var.client_certificate)
+  cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
 }
