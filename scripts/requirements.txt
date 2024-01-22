@@ -409,7 +409,7 @@ packaging==23.2
     #   marshmallow
     #   msal-extensions
     #   onnxruntime
-pillow==10.1.0
+pillow==10.2.0
     # via -r requirements.in
 portalocker==2.8.2
     # via
