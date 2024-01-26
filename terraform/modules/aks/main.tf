@@ -35,6 +35,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     vnet_subnet_id          = var.vnet_subnet_id
     pod_subnet_id           = var.pod_subnet_id
     zones                   = var.system_node_pool_availability_zones
+    orchestrator_version    = var.kubernetes_version
     node_labels             = var.system_node_pool_node_labels
     node_taints             = var.system_node_pool_node_taints
     enable_auto_scaling     = var.system_node_pool_enable_auto_scaling
