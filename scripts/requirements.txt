@@ -27,7 +27,7 @@ dataclasses-json==0.5.14
 Deprecated==1.2.14
 distro==1.8.0
 exceptiongroup==1.2.0
-fastapi==0.100.1
+fastapi==0.109.1
 fastapi-socketio==0.0.10
 filelock==3.13.1
 filetype==1.2.0
