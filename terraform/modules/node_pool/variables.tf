@@ -58,7 +58,7 @@ variable "node_labels" {
 variable "node_taints" {
   description = "(Optional) A map of Kubernetes labels which should be applied to nodes in this Node Pool. Changing this forces a new resource to be created."
   type          = list(string)
-  default       = ["CriticalAddonsOnly=true:NoSchedule"]
+  default       = []
 } 
 
 variable "tags" {
