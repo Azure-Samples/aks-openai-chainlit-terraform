@@ -799,7 +799,7 @@ variable "prometheus_public_network_access_enabled" {
 variable "grafana_name" {
   description = "Specifies the name of the Azure Managed Grafana instance."
   type = string
-  default = "Prometheus"
+  default = "Grafana"
 }
 
 variable "grafana_public_network_access_enabled" {
