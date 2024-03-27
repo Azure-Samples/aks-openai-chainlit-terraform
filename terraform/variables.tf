@@ -182,13 +182,13 @@ variable "system_node_pool_availability_zones" {
 
 variable "network_dns_service_ip" {
   description = "Specifies the DNS service IP"
-  default     = "10.2.0.10"
+  default     = "172.16.0.10"
   type        = string
 }
 
 variable "network_service_cidr" {
   description = "Specifies the service CIDR"
-  default     = "10.2.0.0/24"
+  default     = "172.16.0.0/16"
   type        = string
 }
 
