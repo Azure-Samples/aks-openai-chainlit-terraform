@@ -84,7 +84,7 @@ opentelemetry-semantic-conventions==0.43b0
 opentelemetry-util-http==0.42b0
 overrides==7.4.0
 packaging==23.2
-Pillow==10.1.0
+Pillow==10.3.0
 portalocker==2.8.2
 posthog==3.1.0
 protobuf==4.25.1
