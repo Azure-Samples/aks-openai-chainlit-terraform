@@ -44,7 +44,7 @@ httptools==0.6.1
 httpx==0.24.1
 huggingface-hub==0.19.4
 humanfriendly==10.0
-idna==3.6
+idna==3.7
 importlib-metadata==6.11.0
 importlib-resources==6.1.1
 jsonpatch==1.33
